@@ -5,7 +5,7 @@ var cheerio = require('cheerio');
 
 // load the cheerio object into a variable, `content`
 // which holds data and metadata about the html file (written as txt)
-var content = fs.readFileSync('data-structures/data/m08.txt');
+var content = fs.readFileSync('data/m08.txt');
 
 // load `content` into a cheerio object
 var $ = cheerio.load(content);
@@ -75,7 +75,7 @@ function parseData(data){
       meetingTime.type = "none";
     }
 
-    meeting.meetingTimes.push(meetingTime);
+    meeting.meetingsDetails.push(meetingTime);
     
   }
   
