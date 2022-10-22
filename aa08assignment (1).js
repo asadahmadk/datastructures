@@ -1,81 +1,93 @@
-// npm install axios
-// mkdir data
+// npm install cheerio
 
-const fs = require('fs');
-
-const axios = require('axios');
-
-axios
-  .get('https://parsons.nyc/aa/m08.html')
-  .then(res => {
-    console.log(`statusCode: ${res.status}`);
-    console.log(res.data);
-    fs.writeFileSync('/home/ec2-user/environment/DataStructures/data/m08.txt', res.data);
-  })
-  .catch(error => {
-    console.error(error);
-  });
- 
- //npm install cheerio
-
-//var fs = require('fs');
+var fs = require('fs');
 var cheerio = require('cheerio');
 
 // load the cheerio object into a variable, `content`
 // which holds data and metadata about the html file (written as txt)
-var content = fs.readFileSync('data/m08.txt');
+var content = fs.readFileSync('data-structures/data/m08.txt');
 
 // load `content` into a cheerio object
 var $ = cheerio.load(content);
 
-var meeting = [];
-var meetingfd = [];
-var meetingdetails = [];
-var meetings = [];
-
-$('tr').each(function(i, element) {
-    if ($(element).attr("style")=="margin-bottom:10px") {
-        let row = ($(element).html());
-        console.log('*************');
-  //Make a loop to extract data from the raw data
-   meetings.forEach(function(meeting){
-  const meetingfdName = meeting.split(';">')[1];
-  //const meetingfdTag= meeting.split('\t\t\t\t  \t    <b>')[1].split('</b><br />')[0]
-  const meetingfdWheelChair = meeting.includes('Wheelchair Access');
-  const meetingfdlocation = meeting.split('\t\t\t\t\t\t')[1];
-  const meetingfdnearby = meeting.split('\t\t\t\t\t\t<br />')[1];
-  const meetingfdzip = meeting.split('\t\t\t\t\t\t<br />')[1];
-  //const meetingfdtime = meeting.split('\t\t\t\t  \t    <b>');
-  const meetingfdDetails=[];
-
-//a loop to get the time
-  meetingdetails.forEach(function parseDetails (p) {
-// splitting time array on the basis of spacing
-let q = p[1].split(' ');
-  meetingfdDetails.push({
-    day:p[0],
-    startTime: p[3] +p[4],
-    endTime: p[6] + p[7],
-    meetingType: p[11]});
-}); 
-//Final Array in the result
-  meetingfd.push({
-    name: meetingfdName,
-    location: {meetingfdlocation,
-               meetingfdnearby,
-               //tag: meetingfdTag,
-               zip: meetingfdzip},
-    wheelchairaccess:meetingfdWheelChair,
-    time: meetingfdDetails
+function parseData(data){
+  //create meeting list
+  const meeting={
+    name:"",
+    location:"",
+    address:"",
+    wheelchair:"",
+    meetingsDetails: []
   
-});
+};
 
-});
-        
+//two proportions of data to be split in left and right
+  const left = data.split("</td>")[0];
+  const right_arr = data.split("</td>")[1].split('\t\t\t\t  \t    <b>').splice(1);
   
-  return console.log(meeting);
-} //console.log(tr1);
-        
+  //for left part
+  const location =  left.split('<b>')[0].split('0;">')[1].split('</h4>')[0];
+ 
+  // console.log(left.split('<b>'))
+  const address1 = left.split('<b>')[1].split("<br>")[1].replace("\t\t\t\t\t\t",'').trim()
+  const address2 = left.split('<b>')[1].split("<br>")[2].replace("\t\t\t\t\t\t",'').trim()
+  const address = address1 + address2
+  const name = left.split('<b>')[1].split("<br />")[0].replace("</b>").split('<br>')[0].split("-")[0]
   
+// compile data
+  meeting.name = name;
+  meeting.location = location;
+  meeting.address = address;
+  
+//wheelChair option
+  if(left.includes('Wheelchair Access')){
+    meeting.wheelchair = "yes";
+  }else{
+    meeting.wheelchair = "not available";
+  }
+   //get meeting time
+  for(let i=0;i<right_arr.length;i++){
+    //create a meeting time list
+    let meetingTime={
+    day: "",
+    start: "",
+    end:"",
+    type:"",
+    specialInterest:"",
+  };
+    
+    let item = right_arr[i];
+    meetingTime.day = item.split(" ")[0];
+    meetingTime.start = item.split('b')[1].replace("> ",'').replace(" <",'');
+    meetingTime.end = item.split('b')[3].replace("> ",'').replace(" <",'');
+    
+    // search special interest
+    if(item.includes("Special")) {
+      meetingTime.specialInterest = item.split('b')[9].replace(/\t|\n|\v|\r|\f/g,'').replace("> ",'').replace(" <",'');
+    } else{
+      meetingTime.specialInterest = "none";
+    }
+    
+    // check meeting time
+    if(item.includes("Type")){
+      meetingTime.type = item.split('b')[6].replace(/\t|\n|\v|\r|\f/g,'').replace("> ",'').replace(" <",'');
+    }else{
+      meetingTime.type = "none";
+    }
+
+    meeting.meetingTimes.push(meetingTime);
+    
+  }
+  
+  return meeting;
 }
-);
+  
+$('tr').each(function(i, elem) {
+    if ($(elem).attr("style")=="margin-bottom:10px") {
+        let row = $(elem).html();
+// run my function
+        let result = parseData(row); 
+        console.log(result);
+    }
+});
+
