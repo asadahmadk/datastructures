@@ -12,7 +12,7 @@ dotenv.config();
 const API_KEY = 'ba0d85f7e6e847ff8fcb4492acedd62d';
 const API_URL = 'https://geoservices.tamu.edu/Services/Geocode/WebService/GeocoderWebServiceHttpNonParsed_V04_01.aspx'
 
-// geocode addresses
+// geocode addresses from Parse Functions file
 let meetingsData = [];
 let addresses = [ '109 West 129th Street',
   '240 West 145th Street',
