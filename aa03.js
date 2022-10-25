@@ -9,7 +9,7 @@ const fs = require('fs'),
 
 // TAMU api key
 dotenv.config();
-const API_KEY = 'ba0d85f7e6e847ff8fcb4492acedd62d';
+const API_KEY = 'API_KEY';
 const API_URL = 'https://geoservices.tamu.edu/Services/Geocode/WebService/GeocoderWebServiceHttpNonParsed_V04_01.aspx'
 
 // geocode addresses
@@ -48,7 +48,7 @@ async.eachSeries(addresses, function(value, callback) {
         streetAddress: value,
         city: "New York",
         state: "NY",
-        apikey: 'ba0d85f7e6e847ff8fcb4492acedd62d',
+        apikey: 'API_KEY',
         format: "json",
         version: "4.01"
     };
