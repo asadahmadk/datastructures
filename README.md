@@ -5,5 +5,5 @@ Convert the code to fit into a single function, which takes as input a single st
 from any of the zones). It's output is ONE array or object; 
 this array or object has a nested array(s) and object(s), to have separate containers for each "meeting"
 
-The output will be like this:
+
 
